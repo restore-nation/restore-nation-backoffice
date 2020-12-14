@@ -5,7 +5,7 @@ const path = require('path');
 
 const { otoroshiMiddleware } = require('./oto');
 const { schema } = require('./schema');
-const e = require('express');
+const { Clients } = require('./client');
 
 const port = process.env.PORT || 8080;
 const mode = process.env.MODE || 'dev';
