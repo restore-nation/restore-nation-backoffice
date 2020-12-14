@@ -25,18 +25,15 @@ const clients = Clients({
 
 function user() {
   return (req, res, next) => {
-    console.log(req.token);
     clients.users.searchOne({ filter: { email: req.token.user.email }}).then(user => {
       if (user) {
         req.user = user;
-        // console.log(user)
         next();
       } else {
         clients.users.create({
           ...req.token.user
         }).then(user => {
           req.user = user;
-          // console.log(user);
           next();
         });
       }
