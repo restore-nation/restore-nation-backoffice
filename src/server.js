@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const { otoroshiMiddleware } = require('./oto');
+const { schema } = require('./schema');
+const e = require('express');
 
 const port = process.env.PORT || 8080;
 const mode = process.env.MODE || 'dev';
@@ -11,6 +13,34 @@ const mode = process.env.MODE || 'dev';
 const app = express();
 
 const views = {};
+
+const clients = Clients({
+  entities: schema.entities,
+  auth: {
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+  }
+})
+
+function user() {
+  return (req, res, next) => {
+    clients.users.searchOne({ filter: { email: req.token.user.email }}).then(user => {
+      if (user) {
+        req.user = user;
+        console.log(user)
+        next();
+      } else {
+        clients.users.create({
+          ...req.token.user
+        }).then(user => {
+          req.user = user;
+          console.log(user);
+          next();
+        });
+      }
+    });
+  };
+}
 
 function serveIndex(req, res) {
   const filePath = path.resolve('./src/views/index.html');
@@ -28,6 +58,7 @@ app.use(bodyParser.json({ limit: '100mb' }));
 app.use('/assets', express.static('assets'));
 app.use('/dist', express.static('dist'));
 app.use(otoroshiMiddleware());
+app.use(user());
 
 app.get('/me', (req, res) => {
   res.status(200).send(req.token.user);

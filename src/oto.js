@@ -28,9 +28,7 @@ function otoroshiMiddleware(opts) {
         "apikey":{
           "clientId":"g60h4vup1fn88dxt",
           "clientName":"Imelda Lowe's api-key",
-          "metadata":{
-            "apihub-orga": "api_536a6d6a-efaa-451a-85ab-48c4f87909c0", //"orga_1"
-          },
+          "metadata":{},
           "tags":[]
         }
       };
