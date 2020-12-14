@@ -15,6 +15,7 @@ const app = express();
 const views = {};
 
 const clients = Clients({
+  root: 'https://apihub.restore-nation.site/apis',
   entities: schema.entities,
   auth: {
     clientId: process.env.CLIENT_ID,
@@ -24,6 +25,7 @@ const clients = Clients({
 
 function user() {
   return (req, res, next) => {
+    console.log(req.token);
     clients.users.searchOne({ filter: { email: req.token.user.email }}).then(user => {
       if (user) {
         req.user = user;
