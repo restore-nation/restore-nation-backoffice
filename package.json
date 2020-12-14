@@ -1,0 +1,7 @@
+{
+  "name": "restore-nation-backoffice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Mathieu Ancelin <mathieu.ancelin@gmail.com>",
+  "license": "MIT"
+}
