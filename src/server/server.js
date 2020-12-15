@@ -26,19 +26,24 @@ const clients = Clients({
 
 function user() {
   return (req, res, next) => {
-    clients.users.searchOne({ filter: { email: req.token.user.email }}).then(user => {
-      if (user) {
-        req.user = user;
-        next();
-      } else {
-        clients.users.create({
-          ...req.token.user
-        }).then(user => {
+    if (req.token.user || (req.token.apikey && req.token.apikey.metadata.email)) {
+      const _user = req.token.user ? req.token.user : { email: req.token.apikey.metadata.email };
+      clients.users.searchOne({ filter: { email: _user.email }}).then(user => {
+        if (user) {
           req.user = user;
           next();
-        });
-      }
-    });
+        } else {
+          clients.users.create({
+            ..._user
+          }).then(user => {
+            req.user = user;
+            next();
+          });
+        }
+      });
+    } else {
+      res.status(400).send({ error: 'no user !' })
+    }
   };
 }
 
@@ -72,7 +77,7 @@ app.use(user());
 app.use(ensureUser());
 
 app.get('/me', (req, res) => {
-  res.status(200).send(req.token.user);
+  res.status(200).send(req.token.user || req.token.apikey);
 });
 app.use('/apis', Apis({ clients }))
 app.get('/index.html', serveIndex);

@@ -7,9 +7,10 @@ function Apis(opts) {
   const router = express.Router();
 
   function markOrderAsInProgress(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
-        clients.orders.update(order.uid, { ...order, status: 'IN_PROGRESS', restaurant: req.restId }).then(order => {
+        // TODO: send mail
+        clients.orders.update(order.uid, { ...order, status: 'IN_PROGRESS', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
         });
       } else {
@@ -19,9 +20,10 @@ function Apis(opts) {
   }
 
   function markOrderAsDone(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
-        clients.orders.update(order.uid, { ...order, status: 'DONE', restaurant: req.restId }).then(order => {
+        // TODO: send mail
+        clients.orders.update(order.uid, { ...order, status: 'DONE', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
         });
       } else {
@@ -31,9 +33,10 @@ function Apis(opts) {
   }
 
   function markOrderAsArchived(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
-        clients.orders.update(order.uid, { ...order, status: 'ARCHIVED', restaurant: req.restId }).then(order => {
+        // TODO: send mail
+        clients.orders.update(order.uid, { ...order, status: 'ARCHIVED', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
         });
       } else {
@@ -43,7 +46,7 @@ function Apis(opts) {
   }
 
   function getOrders(req, res) {
-    clients.restaurants.searchOne({ filter: { uid: req.restId, owner: req.user.uid } }).then(restaurant => {
+    clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       if (restaurant) {
         clients.orders.search({ filter: { restaurant: restaurant.uid } }).then(orders => {
           res.status(200).send(orders);
@@ -55,13 +58,13 @@ function Apis(opts) {
   }
 
   function getRestaurant(req, res) {
-    clients.restaurants.searchOne({ filter: { uid: req.restId, owner: req.user.uid } }).then(restaurant => {
+    clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       res.status(200).send(restaurant);
     });
   }
 
   function updateRestaurant(req, res) {
-    clients.restaurants.searchOne({ filter: { uid: req.restId, owner: req.user.uid } }).then(restaurant => {
+    clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       if (restaurant) {
         clients.restaurants.update(restaurant.uid, { ...req.body, owner: req.user.uid }).then(restaurant => {
           res.status(200).send(restaurant);
@@ -73,7 +76,8 @@ function Apis(opts) {
   }
 
   function deleteRestaurant(req, res) {
-    clients.restaurants.searchOne({ filter: { uid: req.restId, owner: req.user.uid } }).then(restaurant => {
+    // TODO: call oto
+    clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       if (restaurant) {
         clients.restaurants.deleteById(restaurant.uid).then(() => {
           res.status(200).send({ done: true });
@@ -91,6 +95,7 @@ function Apis(opts) {
   }
 
   function createRestaurant(req, res) {
+    // TODO: call oto
     clients.restaurants.create({ ...req.body, owner: req.user.uid }).then(restaurant => {
       res.status(201).send(restaurant);
     });
