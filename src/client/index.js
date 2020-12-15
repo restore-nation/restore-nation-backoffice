@@ -60,17 +60,98 @@ class RestaurantEdit extends Component {
     }).then(r => r.json()).then(restaurant => this.setState({ restaurant }));
   }
 
+  save = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.state.restaurant)
+    }).then(r => r.json())
+  }
+
+  onChange = (e) => {
+    const restaurant = this.state.restaurant;
+    if (e.target.name === 'location.lat') {
+      restaurant.location.lat = e.target.value;
+    } else if (e.target.name === 'location.lng') {
+      restaurant.location.lng = e.target.value;
+    } else {
+      restaurant[e.target.name] = e.target.value;
+    }
+    this.setState({ restaurant })
+  }
+
   render() {
+    if (!this.state.restaurant) return null;
+    const restaurant = this.state.restaurant;
     return (
       <>
-      <h1>TODO: Edit {this.props.id}</h1>
-      name
-      description
-      phone
-      email
-      website
-      address
-      location
+        <section className="jumbotron text-center ">
+          <div className="container">
+            <h1 className="resto-name">{restaurant.name}</h1>
+            <div className="btn-group">
+              <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
+              <button type="button" className="btn btn-success" onClick={e => this.save()}><i className="fas fa-save" /> sauvegarder</button>
+            </div>
+          </div>
+        </section>
+        <div className="album py-5 bg-light">
+          <div className="container">
+          <form>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Nom</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="name" value={restaurant.name} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Description</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="description" value={restaurant.description} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Photo</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control"  onChange={this.onChange} name="phone" value={restaurant.phone} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Email</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control"  onChange={this.onChange} name="email" value={restaurant.email} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Site web</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control"  onChange={this.onChange} name="website" value={restaurant.website} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Adresse</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control"  onChange={this.onChange} name="address" value={restaurant.address} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Latitude</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control"  onChange={this.onChange} name="location.lat" value={restaurant.location.lat} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Longitude</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control"  onChange={this.onChange} name="location.lng" value={restaurant.location.lng} />
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
       </>
     )
   }
@@ -151,12 +232,65 @@ class Menu extends Component {
     }).then(r => r.json()).then(restaurant => this.setState({ restaurant }));
   }
 
+  save = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.state.restaurant)
+    }).then(r => r.json())
+  }
+
+  onChange = (e) => {
+    const menu = this.state.restaurant.menus.filter(m => m.uid === this.props.menuId)[0];
+    menu[e.target.name] = e.target.value;
+    this.setState({ restaurant: this.state.restaurant })
+  }
+
   render() {
     if (!this.state.restaurant) return null;
     const carte = this.state.restaurant.carte;
     const menu = this.state.restaurant.menus.filter(m => m.uid === this.props.menuId)[0];
     return (
-      <h1>TODO: Menu {menu.name}</h1>
+      <>
+        <section className="jumbotron text-center ">
+          <div className="container">
+            <h1 className="resto-name">{menu.name}</h1>
+            <div className="btn-group">
+              <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
+              <button type="button" className="btn btn-success" onClick={e => this.save()}><i className="fas fa-save" /> sauvegarder</button>
+            </div>
+          </div>
+        </section>
+        <div className="album py-5 bg-light">
+          <div className="container">
+          <form>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Nom</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="name" value={menu.name} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Description</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="description" value={menu.description} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Price</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control"  onChange={this.onChange} name="price" value={menu.price} />
+              </div>
+            </div>
+            TODO: 
+          </form>
+          </div>
+        </div>
+      </>
     )
   }
 }
@@ -200,7 +334,6 @@ class Dish extends Component {
   onChange = (e) => {
     const dish = this.state.restaurant.carte.filter(m => m.uid === this.props.dishId)[0];
     dish[e.target.name] = e.target.value;
-    console.log(e.target.name, dish[e.target.name])
     this.setState({ restaurant: this.state.restaurant })
   }
 
@@ -326,6 +459,25 @@ class Restaurant extends Component {
     });
   }
 
+  addMenu = () => {
+    const uid = "menu_" + faker.random.alphaNumeric(16);
+    this.state.restaurant.menus.push({
+      "uid": uid,
+      "name": "menu du midi",
+      "description": "un petit menu qu'il est sympa",
+      "price": 14.99,
+      "hours": [{ "from": "12h00", "to": "15h00" }],
+      "main": [{"ref":"dish_1"}],
+      "dessert": [{"ref":"dish_2"}],
+      "other": [{"ref":"dish_3"}]
+    })
+    this.setState({ restaurant: this.state.restaurant }, () => {
+      this.save().then(() => {
+        window.location = '/restaurants/' + this.props.id + '/menus/' + uid
+      });
+    });
+  }
+
   render() {
     if (!this.state.restaurant) {
       return null;
@@ -336,6 +488,9 @@ class Restaurant extends Component {
           <div className="container">
             <h1 className="resto-name">{this.state.restaurant.name}</h1>
             <p className="lead text-muted resto-description">{this.state.restaurant.description}</p>
+            <p className="lead text-muted resto-description">
+              <a href={`https://${this.state.restaurant.domain}-v2.restore-nation.site`}>{`https://${this.state.restaurant.domain}-v2.restore-nation.site`}</a>
+            </p>
             <p className="lead text-muted" style={{ fontSize: 'small' }}>{this.state.restaurant.access.clientId} / {this.state.restaurant.access.clientSecret}</p>
             <div className="btn-group">
               <Link type="button" className="btn btn-secondary" to={`/`}><i className="fas fa-arrow-left" /> retour aux restaurants</Link>
@@ -348,7 +503,7 @@ class Restaurant extends Component {
         <div className="album py-5 bg-light">
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
             <h3>Les menus</h3>
-            <button style={{ marginLeft: 10 }} type="button" className="btn btn-success btn-sm"><i className="fas fa-plus"/></button>
+            <button style={{ marginLeft: 10 }} type="button" className="btn btn-success btn-sm" onClick={this.addMenu}><i className="fas fa-plus"/></button>
           </div>
           <div className="container">
             <table className="table table-striped table-bordered table-hover table-sm">
