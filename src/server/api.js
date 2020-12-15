@@ -123,10 +123,14 @@ function Apis(opts) {
         'Accept': 'application/json',
         'Authorization': `Basic ${Buffer.from(`${process.env.OTO_CLIENT_ID}:${process.env.OTO_CLIENT_SECRET}`).toString('base64')}`
       }
-    }).then(r => r.json())
+    }).then(r => {
+      r.text().then(js => {
+        console.log('delete service', r.status, js)
+      })
+    })
   }
 
-  function createServiceDescriptor(uid, domain) {
+  function createServiceDescriptor(uid, userUid, domain) {
     return fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/services/_template`, {
       method: 'GET',
       headers: {
@@ -150,6 +154,9 @@ function Apis(opts) {
           "subdomain": domain + "-v2",
           "root": "/apis/restaurants/" + uid,
           "matchingRoot": "/data.json",
+          "publicPatterns": [
+            "/.*"
+          ],
           "targets": [
             {
               "host": "app-ae24c7f8-b006-475b-922c-ba3b152ef880.cleverapps.io",
@@ -177,6 +184,9 @@ function Apis(opts) {
             "size": 512,
             "secret": "secret",
             "base64": false
+          },
+          "additionalHeaders": {
+            "x-user-uid": userUid
           }
         })
       }).then(r => {
@@ -219,7 +229,7 @@ function Apis(opts) {
     const clientId = faker.random.alphaNumeric(32);
     const clientSecret = faker.random.alphaNumeric(32);
     clients.restaurants.create({ ...req.body, owner: req.user.uid, access: { clientId, clientSecret } }).then(restaurant => {
-      createServiceDescriptor(restaurant.uid, restaurant.domain);
+      createServiceDescriptor(restaurant.uid, req.user.uid, restaurant.domain);
       createApikey(restaurant.uid, req.user.email, clientId, clientSecret);
       res.status(201).send(restaurant);
     });
