@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 class App extends Component {
@@ -99,6 +100,7 @@ class Restaurant extends Component {
             <h1 className="resto-name">{this.state.restaurant.name}</h1>
             <p class="lead text-muted resto-description">{this.state.restaurant.description}</p>
             <div className="btn-group">
+              <Link type="button" className="btn btn-secondary" to={`/`}><i className="fas fa-arrow-left" /> retour aux restaurants</Link>
               <Link type="button" className="btn btn-info" to={`/restaurants/${this.state.restaurant.uid}/orders`}><i className="fas fa-file-alt" /> commandes</Link>
               <button type="button" className="btn btn-success" onClick={this.editRestaurant}><i className="fas fa-edit" /> editer</button>
               <button type="button" className="btn btn-danger" onClick={this.deleteRestaurant}><i className="fas fa-trash" /> supprimer</button>
@@ -202,7 +204,49 @@ class Orders extends Component {
         headers: { 
           'Accept': 'application/json'
         }
-      }).then(r => r.json()).then(orders => this.setState({ orders }))
+      }).then(r => r.json()).then(orders => this.setState({ orders: _.sortBy(orders, o => o.date) }))
+    })
+  }
+
+  inProgress = (uid) => {
+    fetch('/apis/restaurants/' + this.props.id + '/orders/' + uid + '/_inprogress', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    }).then(() => {
+      this.reload()
+    })
+  }
+
+  done = (uid) => {
+    fetch('/apis/restaurants/' + this.props.id + '/orders/' + uid + '/_done', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    }).then(() => {
+      this.reload()
+    })
+  }
+
+  archive = (uid) => {
+    fetch('/apis/restaurants/' + this.props.id + '/orders/' + uid + '/_archived', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    }).then(() => {
+      this.reload()
     })
   }
 
@@ -216,6 +260,7 @@ class Orders extends Component {
           <div className="container">
             <h1 className="resto-name">{this.state.restaurant.name}</h1>
             <p class="lead text-muted resto-description">Liste des commandes</p>
+            <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
           </div>
         </section>
         <div className="album py-5 bg-light">
@@ -225,7 +270,8 @@ class Orders extends Component {
                 <tr>
                   <th scope="col">#</th>
                   <th scope="col">Nom</th>
-                  <th scope="col">Prix</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Date</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -235,7 +281,8 @@ class Orders extends Component {
                     <tr key={order.uid}>
                       <th scope="row">{idx + 1}</th>
                       <td>{order.firstName} {order.lastName}</td>
-                      <td>{order.total} €</td>
+                      <td>{order.status}</td>
+                      <td>{order.date}</td>
                       <td>
                         <button style={{ marginRight: 10 }} type="button" className="btn btn-sm btn-info" onClick={e => this.show(order.uid)}><i className="fas fa-eye" /></button>
                         <div className="btn-group">

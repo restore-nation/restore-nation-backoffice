@@ -9,10 +9,10 @@ function Apis(opts) {
 
   const router = express.Router();
 
-  function sendMail(status) {
+  function sendMail(status, to) {
     const params = new URLSearchParams();
     params.append('from', 'Restore Nation <rn@restore-nation.site>');
-    params.append('to', order.to);
+    params.append('to', to);
     params.append('subject', 'Mise à jour du status de votre commande');
     params.append('html', 'L\'état de votre commande est desormais: ' + status);
     fetch(`https://api.eu.mailgun.net/v3/${process.env.MAILGUN_DOMAIN}/messages`, {
@@ -26,9 +26,9 @@ function Apis(opts) {
   }
 
   function markOrderAsInProgress(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant_uid: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
-        sendMail('En cours de préparation');
+        sendMail('En cours de préparation', order.to);
         clients.orders.update(order.uid, { ...order, status: 'IN_PROGRESS', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
         });
@@ -39,9 +39,9 @@ function Apis(opts) {
   }
 
   function markOrderAsDone(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant_uid: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
-        sendMail('Prête');
+        sendMail('Prête', order.to);
         clients.orders.update(order.uid, { ...order, status: 'DONE', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
         });
@@ -52,7 +52,7 @@ function Apis(opts) {
   }
 
   function markOrderAsArchived(req, res) {
-    clients.orders.searchOne({ filter: { restaurant: req.params.restId, uid: req.params.ordId } }).then(order => {
+    clients.orders.searchOne({ filter: { restaurant_uid: req.params.restId, uid: req.params.ordId } }).then(order => {
       if (order) {
         clients.orders.update(order.uid, { ...order, status: 'ARCHIVED', restaurant: req.params.restId }).then(order => {
           res.status(200).send(order);
@@ -66,8 +66,8 @@ function Apis(opts) {
   function getOrders(req, res) {
     clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       if (restaurant) {
-        clients.orders.search({ filter: { restaurant: restaurant.uid } }).then(orders => {
-          res.status(200).send(orders);
+        clients.orders.search({ filter: { restaurant_uid: restaurant.uid } }).then(orders => {
+          res.status(200).send(orders.filter(o => o.status !== 'ARCHIVED'));
         });
       } else {
         res.status(404).send({ error: 'restaurant not found'})
