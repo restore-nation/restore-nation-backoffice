@@ -1,13 +1,13 @@
 {
   "name": "restore-nation-backoffice",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "src/server/server.js",
   "license": "MIT",
   "scripts": {
     "build": "parcel build src/client/index.js --out-file client.min.js",
     "dev-client": "parcel serve src/client/index.js -p 3000 --out-file client.js",
-    "dev-server": "MODE=dev nodemon src/server.js",
-    "start": "MODE=prod node src/server.js",
+    "dev-server": "MODE=dev nodemon src/server/server.js",
+    "start": "MODE=prod node src/server/server.js",
     "prettier": "prettier --write --single-quote --trailing-comma es5 --print-width 100 --tab-width 2 --jsx-bracket-same-line \"**/*.js\""
   },
   "dependencies": {
@@ -38,7 +38,8 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "src/client/**"
+      "src/client/**",
+      "dist/**"
     ]
   }
 }

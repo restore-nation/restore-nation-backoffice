@@ -6,6 +6,7 @@ const path = require('path');
 const { otoroshiMiddleware } = require('./oto');
 const { schema } = require('./schema');
 const { Clients } = require('./client');
+const { Apis } = require('./api');
 
 const port = process.env.PORT || 8080;
 const mode = process.env.MODE || 'dev';
@@ -15,7 +16,7 @@ const app = express();
 const views = {};
 
 const clients = Clients({
-  root: 'https://apihub.restore-nation.site/apis',
+  root: process.env.API_ROOT,
   entities: schema.entities,
   auth: {
     clientId: process.env.CLIENT_ID,
@@ -41,6 +42,16 @@ function user() {
   };
 }
 
+function ensureUser() {
+  return (req, res, next) => {
+    if (!req.user) {
+      res.status(400).send({ error: 'no user !' })
+    } else {
+      next();
+    }
+  }
+}
+
 function serveIndex(req, res) {
   const filePath = path.resolve('./src/views/index.html');
   let view = views[filePath];
@@ -58,10 +69,12 @@ app.use('/assets', express.static('assets'));
 app.use('/dist', express.static('dist'));
 app.use(otoroshiMiddleware());
 app.use(user());
+app.use(ensureUser());
 
 app.get('/me', (req, res) => {
   res.status(200).send(req.token.user);
 });
+app.use('/apis', Apis({ clients }))
 app.get('/index.html', serveIndex);
 app.get('/*', serveIndex);
 
