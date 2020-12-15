@@ -117,7 +117,7 @@ function Apis(opts) {
   }
 
   function deleteServiceDescriptor(uid) {
-    return fetch(`https://otoroshi-cb6de59824751b28-api.restore-nation.site/api/services/restore-nation-data-for-${uid}`, {
+    return fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/services/restore-nation-data-for-${uid}`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',
@@ -127,14 +127,14 @@ function Apis(opts) {
   }
 
   function createServiceDescriptor(uid, domain) {
-    return fetch(`https://otoroshi-cb6de59824751b28-api.restore-nation.site/api/services/_template`, {
+    return fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/services/_template`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
       }
     }).then(r => r.json()).then(template => {
-      return fetch(`https://otoroshi-cb6de59824751b28-api.restore-nation.site/api/services`, {
+      return fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/services`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -188,7 +188,7 @@ function Apis(opts) {
   }
 
   function createApikey(uid, email, clientId, clientSecret) {
-    fetch(`https://otoroshi-cb6de59824751b28-api.restore-nation.site/api/apikeys`, {
+    fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/apikeys`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
