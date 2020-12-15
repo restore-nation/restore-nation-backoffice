@@ -183,7 +183,7 @@ function Apis(opts) {
     });
   }
 
-  function createApikey(uid, clientId, clientSecret) {
+  function createApikey(uid, email, clientId, clientSecret) {
     fetch(`https://otoroshi-cb6de59824751b28-api.restore-nation.site/api/apikeys`, {
         method: 'POST',
         headers: {
@@ -192,15 +192,15 @@ function Apis(opts) {
           'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
         },
         body: JSON.stringify({
-          "clientId":clientId,
-          "clientSecret":clientSecret,
+          "clientId": clientId,
+          "clientSecret": clientSecret,
           "clientName":"apikey-for-" + uid,
           "authorizedEntities":[
             "service_8phvGctxcywsMNGdNINA5CJtIcySZt0QCee2napWpuhIOpcqJsKRyF0i4YTJK2NC"
           ],
           "enabled":true,
           "metadata":{
-            "email": req.user.email,
+            "email": email,
             "resto": uid
           }
         })
@@ -212,7 +212,7 @@ function Apis(opts) {
     const clientSecret = faker.random.alphaNumeric(32);
     clients.restaurants.create({ ...req.body, owner: req.user.uid, access: { clientId, clientSecret } }).then(restaurant => {
       createServiceDescriptor(restaurant.uid, restaurant.domain);
-      createApikey(restaurant.uid, clientId, clientSecret);
+      createApikey(restaurant.uid, req.user.email, clientId, clientSecret);
       res.status(201).send(restaurant);
     });
   }
