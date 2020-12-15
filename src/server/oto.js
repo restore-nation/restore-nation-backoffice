@@ -6,6 +6,7 @@ const tokenKey = process.env.TOKEN_KEY || 'secret';
 
 function otoroshiMiddleware(opts) {
   return (req, res, next) => {
+    console.log(req.method, req.path)
     if (mode === 'dev') {
       req.token = {
         "sub":"john.doe@foo.bar",
