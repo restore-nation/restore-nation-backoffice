@@ -121,7 +121,7 @@ function Apis(opts) {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
+        'Authorization': `Basic ${Buffer.from(`${process.env.OTO_CLIENT_ID}:${process.env.OTO_CLIENT_SECRET}`).toString('base64')}`
       }
     }).then(r => r.json())
   }
@@ -131,7 +131,7 @@ function Apis(opts) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
+        'Authorization': `Basic ${Buffer.from(`${process.env.OTO_CLIENT_ID}:${process.env.OTO_CLIENT_SECRET}`).toString('base64')}`
       }
     }).then(r => r.json()).then(template => {
       return fetch(`https://otoroshi-api-cb6de59824751b28.restore-nation.site/api/services`, {
@@ -139,7 +139,7 @@ function Apis(opts) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
+          'Authorization': `Basic ${Buffer.from(`${process.env.OTO_CLIENT_ID}:${process.env.OTO_CLIENT_SECRET}`).toString('base64')}`
         },
         body: JSON.stringify({
           ...template,
@@ -193,7 +193,7 @@ function Apis(opts) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
+          'Authorization': `Basic ${Buffer.from(`${process.env.OTO_CLIENT_ID}:${process.env.OTO_CLIENT_SECRET}`).toString('base64')}`
         },
         body: JSON.stringify({
           "clientId": clientId,
