@@ -179,7 +179,11 @@ function Apis(opts) {
             "base64": false
           }
         })
-      }).then(r => r.json())
+      }).then(r => {
+        r.text().then(js => {
+          console.log('create service', r.status, js)
+        })
+      })
     });
   }
 
@@ -204,7 +208,11 @@ function Apis(opts) {
             "resto": uid
           }
         })
-      }).then(r => r.json())
+      }).then(r => {
+        r.text().then(js => {
+          console.log('create apikey', r.status, js)
+        })
+      })
   }
 
   function createRestaurant(req, res) {
