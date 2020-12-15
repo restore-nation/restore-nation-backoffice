@@ -250,6 +250,18 @@ class Menu extends Component {
     this.setState({ restaurant: this.state.restaurant })
   }
 
+  addDish = (dish, e) => {
+    const menu = this.state.restaurant.menus.filter(m => m.uid === this.props.menuId)[0];
+    if (e.target.checked) {
+      if (!menu[dish.category]) menu[dish.category] = [];
+      const should = menu[dish.category].filter(e => e.ref === dish.uid).length == 0
+      if (should) menu[dish.category].push({ ref: dish.uid });
+    } else {
+      menu[dish.category] = menu[dish.category].filter(e => e.ref !== dish.uid)
+    }
+    this.setState({ restaurant: this.state.restaurant })
+  }
+
   render() {
     if (!this.state.restaurant) return null;
     const carte = this.state.restaurant.carte;
@@ -286,7 +298,21 @@ class Menu extends Component {
                 <input type="number" class="form-control"  onChange={this.onChange} name="price" value={menu.price} />
               </div>
             </div>
-            TODO: 
+            {carte.map(dish => {
+              return (
+                <div class="form-group row">
+                  <div class="col-sm-2"></div>
+                  <div class="col-sm-10">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" onChange={e => this.addDish(dish, e)}  checked={menu[dish.category].filter(i => i.ref === dish.uid).length > 0} />
+                      <label class="form-check-label">
+                        {dish.name}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </form>
           </div>
         </div>
