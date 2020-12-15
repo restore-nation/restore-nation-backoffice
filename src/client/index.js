@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
+import faker from 'faker';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 class App extends Component {
@@ -26,7 +27,11 @@ class App extends Component {
             <Route path="/users">
               <h1>Users</h1>
             </Route>
+            <Route path="/restaurants/:restId/orders/:orderId" component={(props) => <Order id={props.match.params.restId} orderId={props.match.params.orderId} {...props} />} />
             <Route path="/restaurants/:restId/orders" component={(props) => <Orders id={props.match.params.restId} {...props} />} />
+            <Route path="/restaurants/:restId/menus/:menuId" component={(props) => <Menu id={props.match.params.restId} menuId={props.match.params.menuId} {...props} />} />
+            <Route path="/restaurants/:restId/carte/:dishId" component={(props) => <Dish id={props.match.params.restId} dishId={props.match.params.dishId} {...props} />} />
+            <Route path="/restaurants/:restId/edit" component={(props) => <RestaurantEdit id={props.match.params.restId} {...props} />} />
             <Route path="/restaurants/:restId" component={(props) => <Restaurant id={props.match.params.restId} {...props} />} />
             <Route path="/" exact component={(props) => <Home {...props} />} />
           </Switch>
@@ -34,6 +39,219 @@ class App extends Component {
         <footer className="text-muted"></footer>
       </Router>
     );
+  }
+}
+
+class RestaurantEdit extends Component {
+
+  state = { restaurant: null, orders: [] }
+
+  componentDidMount() {
+    this.reload();
+  }
+
+  reload = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json'
+      }
+    }).then(r => r.json()).then(restaurant => this.setState({ restaurant }));
+  }
+
+  render() {
+    return (
+      <>
+      <h1>TODO: Edit {this.props.id}</h1>
+      name
+      description
+      phone
+      email
+      website
+      address
+      location
+      </>
+    )
+  }
+}
+
+class Order extends Component {
+
+  state = { restaurant: null }
+
+  componentDidMount() {
+    this.reload();
+  }
+
+  reload = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json'
+      }
+    }).then(r => r.json()).then(restaurant => this.setState({ restaurant })).then(() => {
+      fetch('/apis/restaurants/' + this.props.id + '/orders/' + this.props.orderId, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 
+          'Accept': 'application/json',
+        },
+      }).then(r => r.json()).then(order => {
+        console.log(order)
+        this.setState({ order })
+      })
+    });
+  }
+
+  render() {
+    if (!this.state.restaurant || !this.state.order) return null;
+    const order = this.state.order;
+    return (
+      <>  
+        <section className="jumbotron text-center ">
+          <div className="container">
+            <h1 className="resto-name">Commande pour {order.firstName} {order.lastName}</h1>
+            <p className="lead text-muted resto-description">{order.date}</p>
+            <div className="btn-group">
+              <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}/orders`}><i className="fas fa-arrow-left" /> retour aux commandes</Link>
+            </div>
+          </div>
+        </section>
+        <div className="album py-5 bg-light">
+          <div className="container">
+            <ul>
+            {Object.keys(order.payload).filter(k => k.indexOf('Restaurant ') < 0 && k.indexOf(' client') < 0).map(k => [k, order.payload[k]]).map(value => {
+              return <li>{value[0]}: ${value[1]}</li>
+            })}
+            </ul>
+          </div>
+        </div>
+      </>
+    )
+  }
+}
+
+class Menu extends Component {
+
+  state = { restaurant: null, orders: [] }
+
+  componentDidMount() {
+    this.reload();
+  }
+
+  reload = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json'
+      }
+    }).then(r => r.json()).then(restaurant => this.setState({ restaurant }));
+  }
+
+  render() {
+    if (!this.state.restaurant) return null;
+    const carte = this.state.restaurant.carte;
+    const menu = this.state.restaurant.menus.filter(m => m.uid === this.props.menuId)[0];
+    return (
+      <h1>TODO: Menu {menu.name}</h1>
+    )
+  }
+}
+
+class Dish extends Component {
+
+  state = { restaurant: null }
+
+  componentDidMount() {
+    this.reload();
+  }
+
+  reload = () => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json'
+      }
+    }).then(r => r.json()).then(restaurant => this.setState({ restaurant }));
+  }
+
+  save = (dish) => {
+    fetch('/apis/restaurants/' + this.props.id, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.state.restaurant)
+    }).then(r => r.json())
+  }
+
+  delete = (dish) => {
+    this.state.restaurant.carte = this.state.restaurant.carte.filter(m => m.uid !== dish.uid);
+    this.save();
+    window.location = `/restaurants/${this.state.restaurant.uid}`
+  }
+
+  onChange = (e) => {
+    const dish = this.state.restaurant.carte.filter(m => m.uid === this.props.dishId)[0];
+    dish[e.target.name] = e.target.value;
+    console.log(e.target.name, dish[e.target.name])
+    this.setState({ restaurant: this.state.restaurant })
+  }
+
+  render() {
+    if (!this.state.restaurant) return null;
+    const dish = this.state.restaurant.carte.filter(m => m.uid === this.props.dishId)[0];
+    return (
+      <>  
+        <section className="jumbotron text-center ">
+          <div className="container">
+            <h1 className="resto-name">{dish.name} - {dish.price} €</h1>
+            <p className="lead text-muted resto-description">{dish.description}</p>
+            <div className="btn-group">
+              <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
+              <button type="button" className="btn btn-success" onClick={e => this.save(dish)}><i className="fas fa-save" /> sauvegarder</button>
+              <button type="button" className="btn btn-danger"  onClick={e => this.delete(dish)}><i className="fas fa-trash" /> supprimer</button>
+            </div>
+          </div>
+        </section>
+        <div className="album py-5 bg-light">
+          <div className="container">
+          <form>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Nom</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="name" value={dish.name} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Description</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" onChange={this.onChange} name="description" value={dish.description} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Photo</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control"  onChange={this.onChange} name="photo" value={dish.photo} />
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2 col-form-label">Prix</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control" onChange={this.onChange} name="price" value={dish.price} />
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+      </>
+    )
   }
 }
 
@@ -77,16 +295,35 @@ class Restaurant extends Component {
     this.setState({ restaurant: newRestaurant });
   }
 
-  editMenu = (uid) => {
-
+  save = () => {
+    return fetch('/apis/restaurants/' + this.props.id, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.state.restaurant)
+    }).then(r => r.json())
   }
 
-  editDish = (uid) => {
-
-  }
-
-  editRestaurant = () => {
-
+  add = () => {
+    const uid = "dish_" + faker.random.alphaNumeric(16);
+    this.state.restaurant.carte.push({
+      "uid": uid,
+      "name": "Le super burger",
+      "description": "un burger qu'il est bien sympa. Buns moelleux sesame, 2 steaks 150gr, Bacon, Sauce du chef. Servi avec un bol de frites",
+      "price": 12.99,
+      "photos": ["https://cac.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fcac.2F2018.2F09.2F25.2F03ab5e89-bad7-4a44-b952-b30c68934215.2Ejpeg/748x372/quality/90/crop-from/center/burger-maison.jpeg"],
+      "vegan": false,
+      "homemade": true,
+      "category": "main"
+    })
+    this.setState({ restaurant: this.state.restaurant }, () => {
+      this.save().then(() => {
+        window.location = '/restaurants/' + this.props.id + '/carte/' + uid
+      });
+    });
   }
 
   render() {
@@ -98,11 +335,12 @@ class Restaurant extends Component {
         <section className="jumbotron text-center ">
           <div className="container">
             <h1 className="resto-name">{this.state.restaurant.name}</h1>
-            <p class="lead text-muted resto-description">{this.state.restaurant.description}</p>
+            <p className="lead text-muted resto-description">{this.state.restaurant.description}</p>
+            <p className="lead text-muted" style={{ fontSize: 'small' }}>{this.state.restaurant.access.clientId} / {this.state.restaurant.access.clientSecret}</p>
             <div className="btn-group">
               <Link type="button" className="btn btn-secondary" to={`/`}><i className="fas fa-arrow-left" /> retour aux restaurants</Link>
               <Link type="button" className="btn btn-info" to={`/restaurants/${this.state.restaurant.uid}/orders`}><i className="fas fa-file-alt" /> commandes</Link>
-              <button type="button" className="btn btn-success" onClick={this.editRestaurant}><i className="fas fa-edit" /> editer</button>
+              <Link type="button" className="btn btn-success" to={`/restaurants/${this.state.restaurant.uid}/edit`}><i className="fas fa-edit" /> editer</Link>
               <button type="button" className="btn btn-danger" onClick={this.deleteRestaurant}><i className="fas fa-trash" /> supprimer</button>
             </div>
           </div>
@@ -131,7 +369,7 @@ class Restaurant extends Component {
                       <td>{menu.price} €</td>
                       <td>
                         <div className="btn-group">
-                          <button type="button" className="btn btn-sm btn-success" onClick={e => this.editMenu(menu.uid)}><i className="fas fa-edit" /></button>
+                          <Link type="button" className="btn btn-sm btn-success" to={`/restaurants/${this.state.restaurant.uid}/menus/${menu.uid}`}><i className="fas fa-edit" /></Link>
                           <button type="button" className="btn btn-sm btn-danger" onClick={e => this.deleteMenu(menu.uid)}><i className="fas fa-trash" /></button>
                         </div>
                       </td>
@@ -145,7 +383,7 @@ class Restaurant extends Component {
         <div className="album py-5 bg-light">
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
             <h3>Les plats</h3>
-            <button style={{ marginLeft: 10 }} type="button" className="btn btn-success btn-sm"><i className="fas fa-plus"/></button>
+            <button style={{ marginLeft: 10 }} type="button" className="btn btn-success btn-sm" onClick={this.add}><i className="fas fa-plus"/></button>
           </div>
           <div className="container">
             <table className="table table-striped table-bordered table-hover table-sm">
@@ -166,7 +404,7 @@ class Restaurant extends Component {
                       <td>{dish.price} €</td>
                       <td>
                         <div className="btn-group">
-                          <button type="button" className="btn btn-sm btn-success" onClick={e => this.editDish(dish.uid)}><i className="fas fa-edit" /></button>
+                        <Link type="button" className="btn btn-sm btn-success" to={`/restaurants/${this.state.restaurant.uid}/carte/${dish.uid}`}><i className="fas fa-edit" /></Link>
                           <button type="button" className="btn btn-sm btn-danger" onClick={e => this.deleteDish(dish.uid)}><i className="fas fa-trash" /></button>
                         </div>
                       </td>
@@ -254,12 +492,13 @@ class Orders extends Component {
     if (!this.state.restaurant) {
       return null;
     }
+    console.log(this.state.orders)
     return (
       <>  
         <section className="jumbotron text-center ">
           <div className="container">
             <h1 className="resto-name">{this.state.restaurant.name}</h1>
-            <p class="lead text-muted resto-description">Liste des commandes</p>
+            <p className="lead text-muted resto-description">Liste des commandes</p>
             <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
           </div>
         </section>
@@ -284,8 +523,8 @@ class Orders extends Component {
                       <td>{order.status}</td>
                       <td>{order.date}</td>
                       <td>
-                        <button style={{ marginRight: 10 }} type="button" className="btn btn-sm btn-info" onClick={e => this.show(order.uid)}><i className="fas fa-eye" /></button>
-                        <div className="btn-group">
+                        <Link style={{ marginRight: 10 }} type="button" className="btn btn-sm btn-info" to={`/restaurants/${this.props.id}/orders/${order.uid}`}><i className="fas fa-eye" /></Link>
+                        <div className="btn-group"> 
                           <button type="button" className="btn btn-sm btn-info" onClick={e => this.inProgress(order.uid)}><i className="fas fa-play" /> en cours</button>
                           <button type="button" className="btn btn-sm btn-success"  onClick={e => this.done(order.uid)}><i className="fas fa-stop" /> prêt</button>
                           <button type="button" className="btn btn-sm btn-danger"  onClick={e => this.archive(order.uid)}><i className="fas fa-trash" /> archiver</button>

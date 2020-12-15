@@ -75,6 +75,18 @@ function Apis(opts) {
     });
   }
 
+  function getOrder(req, res) {
+    clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
+      if (restaurant) {
+        clients.orders.searchOne({ filter: { restaurant_uid: restaurant.uid, uid: req.params.ordId } }).then(order => {
+          res.status(200).send(order);
+        });
+      } else {
+        res.status(404).send({ error: 'restaurant not found'})
+      }
+    });
+  }
+
   function getRestaurant(req, res) {
     clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
       if (restaurant) {
@@ -238,6 +250,7 @@ function Apis(opts) {
   router.post('/restaurants/:restId/orders/:ordId/_inprogress', markOrderAsInProgress);
   router.post('/restaurants/:restId/orders/:ordId/_done', markOrderAsDone);
   router.post('/restaurants/:restId/orders/:ordId/_archived', markOrderAsArchived);
+  router.get('/restaurants/:restId/orders/:ordId', getOrder);
   router.get('/restaurants/:restId/orders', getOrders);
 
   router.get('/restaurants/:restId', getRestaurant)
