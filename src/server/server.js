@@ -26,7 +26,16 @@ const clients = Clients({
 
 function user() {
   return (req, res, next) => {
-    if (req.token.user || (req.token.apikey && req.token.apikey.metadata.email)) {
+    if (req.get('x-user-uid')) {
+      clients.users.searchOne({ filter: { uid: req.get('x-user-uid') }}).then(user => {
+        if (user) {
+          req.user = user;
+          next();
+        } else {
+          res.status(400).send({ error: 'no user ! 1' })
+        }
+      });
+    } else if (req.token.user || (req.token.apikey && req.token.apikey.metadata.email)) {
       const _user = req.token.user ? req.token.user : { email: req.token.apikey.metadata.email };
       clients.users.searchOne({ filter: { email: _user.email }}).then(user => {
         if (user) {
@@ -42,7 +51,7 @@ function user() {
         }
       });
     } else {
-      res.status(400).send({ error: 'no user !' })
+      res.status(400).send({ error: 'no user ! 2' })
     }
   };
 }
@@ -50,7 +59,7 @@ function user() {
 function ensureUser() {
   return (req, res, next) => {
     if (!req.user) {
-      res.status(400).send({ error: 'no user !' })
+      res.status(400).send({ error: 'no user ! 3' })
     } else {
       next();
     }
