@@ -59,7 +59,11 @@ function Apis(opts) {
 
   function getRestaurant(req, res) {
     clients.restaurants.searchOne({ filter: { uid: req.params.restId, owner: req.user.uid } }).then(restaurant => {
-      res.status(200).send(restaurant);
+      if (restaurant) {
+        res.status(200).send(restaurant);
+      } else {
+        res.status(404).send({ error: 'restaurant not found'})
+      }
     });
   }
 
