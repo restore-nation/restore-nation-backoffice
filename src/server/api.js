@@ -237,7 +237,7 @@ function Apis(opts) {
         })
       }).then(r => {
         r.text().then(js => {
-          console.log('create apikey', r.status, js)
+          console.log('create apikey ', r.status, js)
         })
       })
   }
