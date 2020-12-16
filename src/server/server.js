@@ -86,7 +86,8 @@ app.use(user());
 app.use(ensureUser());
 
 app.get('/me', (req, res) => {
-  res.status(200).send(req.token.user || req.token.apikey);
+  // res.status(200).send(req.token.user || req.token.apikey);
+  res.status(200).send(req.user);
 });
 app.use('/apis', Apis({ clients }))
 app.get('/index.html', serveIndex);

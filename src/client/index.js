@@ -6,7 +6,36 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 class App extends Component {
 
+  state = { me: null }
+
+  componentDidMount() {
+    this.me();
+  }
+
+  me = () => {
+    fetch('/me', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json'
+      }
+    }).then(r => r.json()).then(me => this.setState({ me }));
+  }
+
+  setup = () => {
+    fetch('/me', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...this.state.me, setup: true })
+    }).then(r => r.json())
+  }
+
   render() {
+    if (!this.state.me) return null;
     return (
       <Router>
         <header>
@@ -20,21 +49,82 @@ class App extends Component {
           </nav>
         </header>
         <main role="main" style={{ marginTop: '60px' }}>
-          <Switch>
-            <Route path="/about">
-              <h1>About</h1>
-            </Route>
-            <Route path="/users">
-              <h1>Users</h1>
-            </Route>
-            <Route path="/restaurants/:restId/orders/:orderId" component={(props) => <Order id={props.match.params.restId} orderId={props.match.params.orderId} {...props} />} />
-            <Route path="/restaurants/:restId/orders" component={(props) => <Orders id={props.match.params.restId} {...props} />} />
-            <Route path="/restaurants/:restId/menus/:menuId" component={(props) => <Menu id={props.match.params.restId} menuId={props.match.params.menuId} {...props} />} />
-            <Route path="/restaurants/:restId/carte/:dishId" component={(props) => <Dish id={props.match.params.restId} dishId={props.match.params.dishId} {...props} />} />
-            <Route path="/restaurants/:restId/edit" component={(props) => <RestaurantEdit id={props.match.params.restId} {...props} />} />
-            <Route path="/restaurants/:restId" component={(props) => <Restaurant id={props.match.params.restId} {...props} />} />
-            <Route path="/" exact component={(props) => <Home {...props} />} />
-          </Switch>
+          {this.state.me && !this.state.me.setup && (
+            <>
+              <section className="jumbotron text-center ">
+                <div className="container">
+                  <h1 className="resto-name">Création de votre compte</h1>
+                  <p className="lead text-muted resto-description">Remplissez vos coordonnées bancaire afin de pour créer votre compte restore nation</p>
+                </div>
+              </section>
+              <div className="album py-5 bg-light">
+                <div className="container">
+                <form class="needs-validation" novalidate="">
+                  <div class="d-block my-3">
+                    <div class="custom-control custom-radio">
+                      <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked={true} required="" />
+                      <label class="custom-control-label" for="credit">Credit card</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                      <input id="debit" name="paymentMethod" type="radio" class="custom-control-input" required="" />
+                      <label class="custom-control-label" for="debit">Debit card</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                      <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required="" />
+                      <label class="custom-control-label" for="paypal">PayPal</label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="cc-name">Name on card</label>
+                      <input type="text" class="form-control" id="cc-name" placeholder="" required="" />
+                      <small class="text-muted">Full name as displayed on card</small>
+                      <div class="invalid-feedback">
+                        Name on card is required
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="cc-number">Credit card number</label>
+                      <input type="text" class="form-control" id="cc-number" placeholder="" required="" />
+                      <div class="invalid-feedback">
+                        Credit card number is required
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3 mb-3">
+                      <label for="cc-expiration">Expiration</label>
+                      <input type="text" class="form-control" id="cc-expiration" placeholder="" required="" />
+                      <div class="invalid-feedback">
+                        Expiration date required
+                      </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label for="cc-cvv">CVV</label>
+                      <input type="text" class="form-control" id="cc-cvv" placeholder="" required="" />
+                      <div class="invalid-feedback">
+                        Security code required
+                      </div>
+                    </div>
+                  </div>
+                  <hr class="mb-4"/>
+                  <button class="btn btn-primary btn-lg btn-block" onClick={e => this.setup()} type="button">Continuer</button>
+                </form>
+                </div>
+              </div>
+            </>
+          )}
+          {this.state.me && this.state.me.setup && (
+            <Switch>
+              <Route path="/restaurants/:restId/orders/:orderId" component={(props) => <Order id={props.match.params.restId} orderId={props.match.params.orderId} {...props} />} />
+              <Route path="/restaurants/:restId/orders" component={(props) => <Orders id={props.match.params.restId} {...props} />} />
+              <Route path="/restaurants/:restId/menus/:menuId" component={(props) => <Menu id={props.match.params.restId} menuId={props.match.params.menuId} {...props} />} />
+              <Route path="/restaurants/:restId/carte/:dishId" component={(props) => <Dish id={props.match.params.restId} dishId={props.match.params.dishId} {...props} />} />
+              <Route path="/restaurants/:restId/edit" component={(props) => <RestaurantEdit id={props.match.params.restId} {...props} />} />
+              <Route path="/restaurants/:restId" component={(props) => <Restaurant id={props.match.params.restId} {...props} />} />
+              <Route path="/" exact component={(props) => <Home {...props} />} />
+            </Switch>
+          )}
         </main>
         <footer className="text-muted"></footer>
       </Router>
