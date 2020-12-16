@@ -15,6 +15,7 @@ function Apis(opts) {
     params.append('to', to);
     params.append('subject', 'Mise à jour du status de votre commande');
     params.append('html', 'L\'état de votre commande est desormais: ' + status);
+    console.log('sending', params);
     fetch(`https://api.eu.mailgun.net/v3/${process.env.MAILGUN_DOMAIN}/messages`, {
       method: 'POST',
       headers: {
@@ -22,6 +23,10 @@ function Apis(opts) {
         'Authorization': `Basic ${Buffer.from(`api:${process.env.MAILGUN_APIKEY}`).toString('base64')}`
       },
       body: params
+    }).then(r => {
+      r.text().then(js => {
+        console.log('sending email', r.status, js)
+      })
     })
   }
 
