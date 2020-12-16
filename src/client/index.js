@@ -262,6 +262,12 @@ class Menu extends Component {
     this.setState({ restaurant: this.state.restaurant })
   }
 
+  delete = () => {
+    this.state.restaurant.menus = this.state.restaurant.menus.filter(m => m.uid !== this.props.menuId);
+    this.save();
+    window.location = `/restaurants/${this.state.restaurant.uid}`
+  }
+
   render() {
     if (!this.state.restaurant) return null;
     const carte = this.state.restaurant.carte;
@@ -274,6 +280,7 @@ class Menu extends Component {
             <div className="btn-group">
               <Link type="button" className="btn btn-secondary" to={`/restaurants/${this.state.restaurant.uid}`}><i className="fas fa-arrow-left" /> retour au restaurant</Link>
               <button type="button" className="btn btn-success" onClick={e => this.save()}><i className="fas fa-save" /> sauvegarder</button>
+              <button type="button" className="btn btn-danger" onClick={e => this.delete()}><i className="fas fa-trash" /> supprimer</button>
             </div>
           </div>
         </section>
