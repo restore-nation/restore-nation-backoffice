@@ -31,7 +31,9 @@ class App extends Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ...this.state.me, setup: true })
-    }).then(r => r.json())
+    }).then(r => r.json()).then(() => {
+      window.location.reload();
+    })
   }
 
   render() {
