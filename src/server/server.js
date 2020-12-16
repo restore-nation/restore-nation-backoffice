@@ -89,6 +89,11 @@ app.get('/me', (req, res) => {
   // res.status(200).send(req.token.user || req.token.apikey);
   res.status(200).send(req.user);
 });
+app.put('/me', (req, res) => {
+  clients.users.update(req.user.uid, req.body).then(user => {
+    res.status(200).send(req.user);
+  });
+});
 app.use('/apis', Apis({ clients }))
 app.get('/index.html', serveIndex);
 app.get('/*', serveIndex);
