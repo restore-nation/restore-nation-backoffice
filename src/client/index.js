@@ -616,7 +616,7 @@ class Restaurant extends Component {
             <p className="lead text-muted resto-description">
               <a href={`https://${this.state.restaurant.domain}-v2.restore-nation.site`}>{`https://${this.state.restaurant.domain}-v2.restore-nation.site`}</a>
             </p>
-            <p className="lead text-muted" style={{ fontSize: 'small' }}>{this.state.restaurant.access.clientId} / {this.state.restaurant.access.clientSecret}</p>
+            <p className="lead text-muted" style={{ fontSize: 'small' }}>{this.state.restaurant.access.clientId}:{this.state.restaurant.access.clientSecret}</p>
             <div className="btn-group">
               <Link type="button" className="btn btn-secondary" to={`/`}><i className="fas fa-arrow-left" /> retour aux restaurants</Link>
               <Link type="button" className="btn btn-info" to={`/restaurants/${this.state.restaurant.uid}/orders`}><i className="fas fa-file-alt" /> commandes</Link>
