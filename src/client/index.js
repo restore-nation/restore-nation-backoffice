@@ -296,7 +296,7 @@ class Order extends Component {
           <div className="container">
             <ul>
             {Object.keys(order.payload).filter(k => k.indexOf('Restaurant ') < 0 && k.indexOf(' client') < 0).map(k => [k, order.payload[k]]).map(value => {
-              return <li>{value[0]}: ${value[1]}</li>
+              return <li>{value[0]}: {value[1]}</li>
             })}
             </ul>
           </div>
